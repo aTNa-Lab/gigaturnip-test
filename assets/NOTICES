@@ -7869,6 +7869,7 @@ SOFTWARE.
 --------------------------------------------------------------------------------
 flutter_image_compress
 flutter_image_compress_common
+flutter_image_compress_macos
 flutter_image_compress_platform_interface
 flutter_image_compress_web
 
