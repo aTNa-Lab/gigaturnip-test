@@ -1,9 +1,11 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gigaturnip/extensions/buildcontext/loc.dart';
 import 'package:gigaturnip/src/bloc/bloc.dart';
 import 'package:gigaturnip/src/theme/index.dart';
 import 'package:gigaturnip/src/widgets/app_bar/default_app_bar.dart';
+import 'package:gigaturnip/src/widgets/push_notification_page.dart';
 import 'package:gigaturnip/src/widgets/widgets.dart';
 import 'package:gigaturnip_api/gigaturnip_api.dart' as api;
 import 'package:gigaturnip_repository/gigaturnip_repository.dart';
@@ -81,9 +83,35 @@ class CampaignView extends StatefulWidget {
 }
 
 class _CampaignViewState extends State<CampaignView> {
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
   bool showFilters = false;
   List<dynamic> queries = [];
   final Map<String, dynamic> queryMap = {};
+
+  @override
+  void initState() {
+    /// attach event listeners for when a notification opens the app
+    FirebaseMessaging.onMessageOpenedApp.listen((message) {
+      if (message.notification != null) {
+        handleMessage(message);
+      }
+    });
+
+    /// handle messages while app is in the foreground
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      if (message.notification != null) {
+        handleMessage(message);
+      }
+    });
+
+    /// handle notification if the app was terminated and now opened
+    messaging.getInitialMessage().then((message) => {
+      if (message?.notification != null) {
+        handleMessage(message)
+      }
+    });
+    super.initState();
+  }
 
   void onFilterTapByQuery(Map<String, dynamic> map) {
     context.read<UserCampaignCubit>().refetchWithFilter(query: map);
@@ -109,8 +137,28 @@ class _CampaignViewState extends State<CampaignView> {
     }
   }
 
+  void handleMessage(RemoteMessage? message) {
+    if (message == null) return;
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const PushNotificationPage(),
+        settings: RouteSettings(arguments: message),
+      ),
+    );
+  }
+
+  void initPushNotifications(gigaTurnipApiClient) async {
+    final token = await messaging.getToken();
+    await gigaTurnipApiClient.updateFcmToken({'fcm_token': token});
+  }
+
   @override
   Widget build(BuildContext context) {
+    final gigaTurnipApiClient = context.read<api.GigaTurnipApiClient>();
+    initPushNotifications(gigaTurnipApiClient);
+
     return BlocBuilder<SelectableCampaignCubit, RemoteDataState<Campaign>>(
       builder: (context, state) {
         final theme = Theme.of(context).colorScheme;
