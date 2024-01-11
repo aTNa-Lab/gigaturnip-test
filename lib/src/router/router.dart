@@ -32,6 +32,8 @@ class AppRouter {
     final query = {...state.uri.queryParameters};
 
     final queryString = toQueryString(query, 'from');
+    print('>>> query = $query');
+    print('>>> queryString = $queryString');
     return '${state.uri.queryParameters['from'] ?? _initialLocation}?$queryString';
   }
 
@@ -51,6 +53,16 @@ class AppRouter {
         ? ''
         : '?from=${state.matchedLocation}&$queryString';
     return PrivacyPolicyRoute.path + fromPage;
+  }
+
+  String redirectToCampaignDetailPage(BuildContext context, GoRouterState state) {
+    final query = {...state.uri.queryParameters};
+    final queryString = query['from'];
+    if (queryString != null && queryString.isNotEmpty) {
+      final campaignId = queryString.substring(queryString.lastIndexOf("/") + 1);
+      return '${CampaignDetailRoute.path.replaceFirst(':cid', campaignId)}/?$queryString';
+    }
+    return _initialLocation;
   }
 
   Future<String?> joinCampaign(BuildContext context, GoRouterState state) async {
@@ -90,7 +102,9 @@ class AppRouter {
         final bool isPrivacyPolicyRoute = state.matchedLocation == PrivacyPolicyRoute.path;
         final bool loggingIn = state.matchedLocation == LoginRoute.path;
         final bool gettingPushNotification = state.matchedLocation == NotificationDetailRoute.path;
-        final campaignIdQueryValue = query['join_campaign'];
+        final campaignJoinQueryValue = query['join_campaign'];
+        final queryValues = query.values;
+        final campaignIdQueryValue = (queryValues.isNotEmpty) ? queryValues.first.contains('/campaign/') : null;
 
         if (isPrivacyPolicyRoute) return redirectToPrivacyPolicyPage(context, state);
 
@@ -101,12 +115,15 @@ class AppRouter {
         if (gettingPushNotification) return redirectToNotificationDetailPage(context, state);
 
 
+        // if there is campaign id query parameter, then send user to CampaignDetailPage
+        if (loggedIn && campaignIdQueryValue != null && campaignIdQueryValue) return redirectToInitialPage(context, state);
+
         // if the user is logged in, send them where they were going before (or
         // home if they weren't going anywhere)
-        if (loggingIn) return redirectToInitialPage(context, state);
+        // if (loggingIn) return redirectToInitialPage(context, state);
 
         // if there is query parameter <join_campaign>, then join campaign and send them to relevant task page
-        if (loggedIn && campaignIdQueryValue != null) {
+        if (loggedIn && campaignJoinQueryValue != null) {
           return await joinCampaign(context, state);
         }
 

@@ -3,10 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:gigaturnip/extensions/buildcontext/loc.dart';
 import 'package:gigaturnip/src/theme/index.dart';
 import 'package:go_router/go_router.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../../router/routes/routes.dart';
-import '../view/language_picker.dart';
+import '../view/pickers.dart';
 import 'provider_buttons.dart';
 
 class LoginPanel extends StatelessWidget {
@@ -54,49 +53,39 @@ class LoginPanel extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Column(
-                children: [
-                  Container(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      context.loc.welcome,
-                      style: titleTextStyle,
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-                  Container(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      (kIsWeb) ? context.loc.choose_language_and_sign_up : context.loc.sign_in_or_sign_up,
-                      style: subtitleTextStyle,
-                    ),
-                  ),
-                ],
-              ),
-              if (kIsWeb)
-                Column(
-                  children: [
-                    const SizedBox(height: 20),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 20),
-                      child: LanguagePicker(
-                        errorMessage: (errorMessage != null && isLocaleSelected == false)
-                            ? errorMessage
-                            : null,
-                        isLocaleSelected: isLocaleSelected ?? true,
-                        campaignLocales: const [],
-                      ),
-                    ),
-                  ],
+              Container(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  context.loc.welcome,
+                  style: titleTextStyle,
                 ),
+              ),
+              const SizedBox(height: 14),
+              Container(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  (kIsWeb) ? context.loc.choose_language_and_sign_up : context.loc.sign_in_or_sign_up,
+                  style: subtitleTextStyle,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 20),
+                child: LanguagePicker(
+                    errorMessage: (errorMessage != null && isLocaleSelected == false)
+                        ? errorMessage
+                        : null,
+                    isLocaleSelected: isLocaleSelected ?? true
+                ),
+              ),
               const SizedBox(height: 60),
               LoginProviderButtons(
-                isActive: isLocaleSelected ?? true,
-                onPressed: (errorMessage) {
-                  onSubmit(errorMessage);
-                }
+                  isActive: isLocaleSelected ?? true,
+                  onPressed: (errorMessage) {
+                    onSubmit(errorMessage);
+                  }
               ),
-              const SizedBox.shrink(),
+              // const SizedBox.shrink(),
               // Column(
               //   children: [
               //     PhoneNumberField(onChanged: onChange),
@@ -137,21 +126,12 @@ class LoginPanel extends StatelessWidget {
                   ),
                   TextButton(
                     style: TextButton.styleFrom(
-                        padding: EdgeInsets.zero,
-                        minimumSize: const Size(50, 30),
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      padding: EdgeInsets.zero,
+                      minimumSize: const Size(50, 30),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
                     onPressed: () async {
-                      if (kIsWeb) {
-                        final url = Uri.parse('https://docs.google.com/document/d/1Jn8WkyVbnpLt-MDPowyDEVM0_vDdSm8d/edit?usp=sharing&ouid=101664496780696593737&rtpof=true&sd=true');
-                        if (await canLaunchUrl(url)) {
-                          await launchUrl(url);
-                        } else {
-                          throw 'Could not launch $url';
-                        }
-                      } else {
-                        context.goNamed(PrivacyPolicyRoute.name);
-                      }
+                      context.goNamed(PrivacyPolicyRoute.name);
                     },
                     child: Text(
                       context.loc.privacy_policy_acceptance_2,
