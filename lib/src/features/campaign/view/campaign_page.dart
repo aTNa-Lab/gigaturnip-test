@@ -27,16 +27,22 @@ class CampaignPage extends StatefulWidget {
 }
 
 class _CampaignPageState extends State<CampaignPage> {
+
+  @override
+  void initState() {
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
     final isGridView = context.isExtraLarge || context.isLarge;
+    final gigaTurnipApiClient = context.read<api.GigaTurnipApiClient>();
 
     return MultiBlocProvider(
       providers: [
         BlocProvider<SelectableCampaignCubit>(
           create: (context) => CampaignCubit(
             SelectableCampaignRepository(
-              gigaTurnipApiClient: context.read<api.GigaTurnipApiClient>(),
+              gigaTurnipApiClient: gigaTurnipApiClient,
               limit: isGridView ? 9 : 10,
             ),
           )..initialize(),
@@ -44,7 +50,7 @@ class _CampaignPageState extends State<CampaignPage> {
         BlocProvider<UserCampaignCubit>(
           create: (context) => CampaignCubit(
             UserCampaignRepository(
-              gigaTurnipApiClient: context.read<api.GigaTurnipApiClient>(),
+              gigaTurnipApiClient: gigaTurnipApiClient,
               limit: isGridView ? 9 : 10,
             ),
           )..initialize(),
@@ -52,21 +58,21 @@ class _CampaignPageState extends State<CampaignPage> {
         BlocProvider(
           create: (context) => CategoryCubit(
             CategoryRepository(
-              gigaTurnipApiClient: context.read<api.GigaTurnipApiClient>(),
+              gigaTurnipApiClient: gigaTurnipApiClient,
             ),
           )..initialize(),
         ),
         BlocProvider(
           create: (context) => CountryCubit(
             CountryRepository(
-              gigaTurnipApiClient: context.read<api.GigaTurnipApiClient>(),
+              gigaTurnipApiClient: gigaTurnipApiClient,
             ),
           )..initialize(),
         ),
         BlocProvider(
           create: (context) => LanguageCubit(
             LanguageRepository(
-              gigaTurnipApiClient: context.read<api.GigaTurnipApiClient>(),
+              gigaTurnipApiClient: gigaTurnipApiClient,
             ),
           )..initialize(),
         ),
