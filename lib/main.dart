@@ -18,7 +18,6 @@ import 'src/router/router.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  usePathUrlStrategy();
   GoRouter.optionURLReflectsImperativeAPIs = true;
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   final authenticationRepository = AuthenticationRepository();
